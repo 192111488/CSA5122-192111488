@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void substitute(char message[], char substitution[]);
+
+int main() {
+    char message[100];
+    char substitution[26];
+
+    printf("Enter a message to encrypt: ");
+    fgets(message, sizeof(message), stdin);
+
+    printf("Enter the substitution alphabet (26 letters): ");
+    fgets(substitution, sizeof(substitution), stdin);
+
+    substitute(message, substitution);
+
+    printf("Encrypted message: %s\n", message);
+
+    return 0;
+}
+
+void substitute(char message[], char substitution[]) {
+    int i = 0;
+    char ch;
+
+    while (message[i] != '\0') {
+        ch = message[i];
+
+        if (isalpha(ch)) {
+            if
