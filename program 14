@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define ALPHABET_SIZE 26
+
+// Function to generate a random key
+void generate_key(int key[], int length) {
+    srand(time(NULL)); // Seed the random number generator
+    for (int i = 0; i < length; i++) {
+        key[i] = rand() % ALPHABET_SIZE; // Generate a random number between 0 and 25
+    }
+}
+
+// Function to encrypt a message using the one-time pad version of the Vigenère cipher
+void encrypt(char message[], int key[], int key_length) {
+    int message_length = strlen(message);
+    for (int i = 0; i < message_length; i++) {
+        if (message[i] != ' ') {
+            message[i] = ((message[i] - 'A') + key[i % key_length]) % ALPHABET_SIZE + 'A'; // Encrypt each character
+        }
+    }
+}
+
+int main() {
+    char plaintext[] = "MEET ME AT THE USUAL PLACE AT TEN RATHER THAN EIGHT O'CLOCK";
+    int key_length = 5; // Length of the key
+    int key[key_length];
+
+    // Generate a random key
+    generate_key(key, key_length);
+
+    printf("Generated Key: ");
+    for (int i = 0; i < key_length; i++) {
+        printf("%d ", key[i]);
+    }
+    printf("\n");
+
+    // Encrypt the plaintext
+    encrypt(plaintext, key, key_length);
+
+    printf("Encrypted Message: %s\n", plaintext);
+
+    return 0;
+}
