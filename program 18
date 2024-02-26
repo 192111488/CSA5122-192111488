@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdint.h>
+
+#define NUM_ROUNDS 16
+#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
+
+// Initial permutation table
+const int initial_permutation[] = {
+    58, 50, 42, 34, 26, 18, 10, 2,
+    60, 52, 44, 36, 28, 20, 12, 4,
+    62, 54, 46, 38, 30, 22, 14, 6,
+    64, 56, 48, 40, 32, 24, 16, 8,
+    57, 49, 41, 33, 25, 17, 9, 1,
+    59, 51, 43, 35, 27, 19, 11, 3,
+    61, 53, 45, 37, 29, 21, 13, 5,
+    63, 55, 47, 39, 31, 23, 15, 7
+};
+
+// Permuted choice 1 (PC-1) table
+const int pc1_table[] = {
+    57, 49, 41, 33, 25, 17, 9,
+    1, 58, 50, 42, 34, 26, 18,
+    10, 2, 59, 51, 43, 35, 27,
+    19, 11, 3, 60, 52, 44, 36,
+    63, 55, 47, 39, 31, 23, 15,
+    7, 62, 54, 46, 38, 30, 22,
+    14, 6, 61, 53, 45, 37, 29,
+    21, 13, 5, 28, 20, 12, 4
+};
+
+// Permuted choice 2 (PC-2) table
+const int pc2_table[] = {
+    14, 17, 11, 24, 1, 5,
+    3, 28, 15, 6, 21, 10,
+    23, 19, 12, 4, 26, 8,
+    16, 7, 27, 20, 13, 2,
+    41, 52, 31, 37, 47, 55,
+    30, 40, 51, 45, 33, 48,
+    44, 49, 39, 56, 34, 53,
+    46, 42, 50, 36, 29, 32
+};
+
+// Key schedule for DES with custom key generation
+void key_schedule(uint64_t key, uint64_t subkeys[NUM_ROUNDS]) {
+    // Perform initial permutation on the key
+    uint64_t permuted_key = 0;
+    for (int i = 0; i < 56; i++) {
+        int bit_position = 64 - pc1_table[i];
+        permuted_key |= ((key >> (bit_position - 1)) & 1) << i;
+    }
+
+    // Split the permuted key into two 28-bit halves
+    uint32_t c = (permuted_key >> 28) & 0x0FFFFFFF;
+    uint32_t d = permuted_key & 0x0FFFFFFF;
+
+    // Generate 16 subkeys
+    for (int i = 0; i < NUM_ROUNDS; i++) {
+        // Perform circular left shifts on c and d
+        int shift_amount = (i < 2 || i == 8 || i == 15) ? 1 : 2;
+        c = ROTATE_LEFT(c, shift_amount);
+        d = ROTATE_LEFT(d, shift_amount);
+
+        // Combine c and d
+        uint64_t cd = ((uint64_t)c << 28) | d;
+
+        // Perform permutation choice 2
+        uint64_t subkey = 0;
+        for (int j = 0; j < 48; j++) {
+            int bit_position = 56 - pc2_table[j];
+            subkey |= ((cd >> (bit_position - 1)) & 1) << (47 - j);
+        }
+
+        // Store the subkey
+        subkeys[i] = subkey;
+    }
+}
+
+int main() {
+    // Example key (64 bits)
+    uint64_t key = 0x133457799BBCD
