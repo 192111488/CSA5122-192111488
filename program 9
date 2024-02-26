@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SIZE 5
+
+char key[SIZE][SIZE] = {
+    {'K', 'X', 'J', 'E', 'Y'},
+    {'U', 'R', 'E', 'B', 'Z'},
+    {'W', 'E', 'H', 'E', 'W'},
+    {'R', 'Y', 'T', 'U', 'H'},
+    {'E', 'Y', 'F', 'S', 'A'}
+};
+
+void find_position(char c, int *row, int *col) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (key[i][j] == c) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+
+void decrypt_playfair(char message[]) {
+    int len = strlen(message);
+    char plaintext[len];
+    int row1, col1, row2, col2;
+
+    for (int i = 0; i < len; i += 2) {
+        if (!isalpha(message[i]) || !isalpha(message[i + 1])) {
+            plaintext[i] = message[i];
+            plaintext[i + 1] = message[i + 1];
+            continue;
+        }
+
+        find_position(message[i], &row1, &col1);
+        find_position(message[i + 1], &row2, &col2);
+
+        if (row1 == row2) {
+            plaintext[i] = key[row1][(col1 + SIZE - 1) % SIZE];
+            plaintext[i + 1] = key[row2][(col2 + SIZE - 1) % SIZE];
+        } else if (col1 == col2) {
+            plaintext[i] = key[(row1 + SIZE - 1) % SIZE][col1];
+            plaintext[i + 1] = key[(row2 + SIZE - 1) % SIZE][col2];
+        } else {
+            plaintext[i] = key[row1][col2];
+            plaintext[i + 1] = key[row2][col1];
+        }
+    }
+
+    plaintext[len] = '\0';
+    printf("Decrypted message: %s\n", plaintext);
+}
+
+int main() {
+    char message[] = "KXJEY UREBE ZWEHE WRYTU HEYFS KREHE GOYFI WTTTU OLKSY CAJPO BOTEI ZONTX BYBNT GONEY CUZWR GDSON SXBOU YWRHE BAAHY USEDQ";
+
+    decrypt_playfair(message);
+
+    return 0;
+}
