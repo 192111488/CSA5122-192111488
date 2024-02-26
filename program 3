@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SIZE 5
+
+void prepare_key(char key[], char key_matrix[][SIZE]);
+void encrypt(char plaintext[], char key_matrix[][SIZE]);
+
+int main() {
+    char key[26];
+    char key_matrix[SIZE][SIZE];
+    char plaintext[100];
+
+    printf("Enter the keyword: ");
+    scanf("%s", key);
+
+    prepare_key(key, key_matrix);
+
+    printf("Enter the plaintext to encrypt: ");
+    scanf("%s", plaintext);
+
+    encrypt(plaintext, key_matrix);
+
+    printf("Encrypted text: %s\n", plaintext);
+
+    return 0;
+}
+
+void prepare_key(char key[], char key_matrix[][SIZE]) {
+    int i, j, k;
+    char alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ"; // no 'J
