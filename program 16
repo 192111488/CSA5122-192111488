@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+#define ALPHABET_SIZE 26
+
+// English letter frequency table (source: https://en.wikipedia.org/wiki/Letter_frequency)
+float english_frequency[ALPHABET_SIZE] = {
+    0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015, 0.06094, 0.06966, 0.00153,
+    0.00772, 0.04025, 0.02406, 0.06749, 0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056,
+    0.02758, 0.00978, 0.02360, 0.00150, 0.01974, 0.00074
+};
+
+// Function to calculate the frequency of each letter in a string
+void calculate_frequency(char text[], float frequency[]) {
+    int total_letters = 0;
+    for (int i = 0; i < strlen(text); i++) {
+        if (isalpha(text[i])) {
+            frequency[toupper(text[i]) - 'A']++;
+            total_letters++;
+        }
+    }
+
+    // Normalize frequencies
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        frequency[i] /= total_letters;
+    }
+}
+
+// Function to calculate the chi-square value for a given key
+float calculate_chi_square(float frequency[]) {
+    float chi_square = 0.0;
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        chi_square += pow((frequency[i] - english_frequency[i]), 2) / english_frequency[i];
+    }
+    return chi_square;
+}
+
+// Function to decrypt a ciphertext using a given key
+void decrypt(char ciphertext[], int key) {
+    int length = strlen(ciphertext);
+    for (int i = 0; i < length; i++) {
+        if (isalpha(ciphertext[i])) {
+            char decrypted_char = ((ciphertext[i] - 'A' - key + ALPHABET_SIZE) % ALPHABET_SIZE) + 'A';
+            printf("%c", decrypted_char);
+        } else {
+            printf("%c", ciphertext[i]);
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    char ciphertext[] = "BQDRK";
+    float frequency[ALPHABET_SIZE] = {0};
+    calculate_frequency(ciphertext, frequency);
+
+    float chi_square[ALPHABET_SIZE] = {0};
+    for (int key = 0; key < ALPHABET_SIZE; key++) {
+        float shifted_frequency[ALPHABET_SIZE] = {0};
+        for (int i = 0; i < ALPHABET_SIZE; i++) {
+            int shifted_index = (i + key) % ALPHABET_SIZE;
+            shifted_frequency[i] = frequency[shifted_index];
+        }
+        chi_square[key] = calculate_chi_square(shifted_frequency);
+    }
+
+    // Find the top 10 possible plaintexts
+    printf("Top 10 possible plaintexts:\n");
+    for (int i = 0; i < 10; i++) {
+        int min_index = 0;
+        float min_chi_square = chi_square[0];
+        for (int j = 1; j < ALPHABET_SIZE; j++) {
+            if (chi_square[j] < min_chi_square) {
+                min_index = j;
+                min_chi_square = chi_square[j];
+            }
+        }
+        printf("Key %d: ", min_index);
+        decrypt(ciphertext, min_index);
+        chi_square[min_index] = INT_MAX; // Set to maximum value to avoid re-selecting this key
+    }
+
+    return 0;
+}
