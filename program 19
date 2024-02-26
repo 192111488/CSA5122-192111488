@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/des.h>
+
+// Encrypt data in CBC mode using 3DES
+void encrypt_3des_cbc(const unsigned char *plaintext, int plaintext_len,
+                       const unsigned char *key, const unsigned char *iv,
+                       unsigned char *ciphertext) {
+    DES_cblock des_key1, des_key2, des_key3;
+    DES_key_schedule key_schedule1, key_schedule2, key_schedule3;
+
+    // Split the 3DES key into three 8-byte keys
+    memcpy(des_key1, key, 8);
+    memcpy(des_key2, key + 8, 8);
+    memcpy(des_key3, key, 8);
+
+    // Set the key schedules
+    DES_set_key_checked(&des_key1, &key_schedule1);
+    DES_set_key_checked(&des_key2, &key_schedule2);
+    DES_set_key_checked(&des_key3, &key_schedule3);
+
+    DES_ede3_cbc_encrypt(plaintext, ciphertext, plaintext_len,
+                         &key_schedule1, &key_schedule2, &key_schedule3,
+                         (DES_cblock *)iv, DES_ENCRYPT);
+}
+
+int main() {
+    // Example 3DES key (24 bytes)
+    unsigned char key[24] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
+        0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10,
+        0x89, 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67
+    };
+
+    // Initialization vector (IV) for CBC mode (8 bytes)
+    unsigned char iv[8] = { 0 };
+
+    // Plaintext to be encrypted
+    unsigned char plaintext[] = "Hello, CBC encryption with 3DES!";
+    int plaintext_len = strlen((char *)plaintext);
+
+    // Buffer for ciphertext
+    unsigned char ciphertext[256];
+
+    // Encrypt the plaintext
+    encrypt_3des_cbc(plaintext, plaintext_len, key, iv, ciphertext);
+
+    // Print the ciphertext
+    printf("Ciphertext: ");
+    for (int i = 0; i < plaintext_len; i++) {
+        printf("%02x", ciphertext[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
