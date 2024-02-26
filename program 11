@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+long long factorial(int n) {
+    if (n <= 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
+int main() {
+    int n = 26; // Number of letters in the alphabet
+    long long keys = factorial(n);
+
+    printf("Number of possible keys for the Playfair cipher: %lld\n", keys);
+
+    return 0;
+}
