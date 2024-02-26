@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void generate_cipher_sequence(char keyword[], char cipher_sequence[]) {
+    int used[26] = {0};
+    int keyword_len = strlen(keyword);
+    int index = 0;
+
+    for (int i = 0; i < keyword_len; i++) {
+        char c = toupper(keyword[i]);
+        if (!used[c - 'A']) {
+            cipher_sequence[index++] = c;
+            used[c - 'A'] = 1;
+        }
+    }
+
+    for (char c = 'A'; c <= 'Z'; c++) {
+        if (!used[c - 'A']) {
+            cipher_sequence[index++] = c;
+        }
+    }
+
+    cipher_sequence[index] = '\0';
+}
+
+void encrypt(char plaintext[], char keyword[], char ciphertext[]) {
+    char cipher_sequence[26];
+    generate_cipher_sequence(keyword, cipher_sequence);
+
+    int len = strlen(plaintext);
+    for (int i = 0; i < len; i++) {
+        if (!isalpha(plaintext[i])) {
+            ciphertext[i] = plaintext[i];
+            continue;
+        }
+
+        char offset = isupper(plaintext[i]) ? 'A' : 'a';
+        int index = toupper(plaintext[i]) - 'A';
+        ciphertext[i] = cipher_sequence[index] + offset - 'A';
+    }
+
+    ciphertext[len] = '\0';
+}
+
+int main() {
+    char plaintext[100];
+    char keyword[] = "CIPHER";
+    char ciphertext[100];
+
+    printf("Enter the plaintext to encrypt: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+
+    encrypt(plaintext, keyword, ciphertext);
+
+    printf("Encrypted text: %s\n", ciphertext);
+
+    return 0;
+}
