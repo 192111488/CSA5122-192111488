@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <ctype.h>
+
+void caesar_cipher(char message[], int shift);
+
+int main() {
+    char message[100];
+    int shift;
+
+    printf("Enter a message to encrypt: ");
+    fgets(message, sizeof(message), stdin);
+
+    printf("Enter the shift value (1 to 25): ");
+    scanf("%d", &shift);
+
+    caesar_cipher(message, shift);
+
+    printf("Encrypted message: %s\n", message);
+
+    return 0;
+}
+
+void caesar_cipher(char message[], int shift) {
+    int i = 0;
+    char ch;
+
+    while (message[i] != '\0') {
+        ch = message[i];
+
+        if (isalpha(ch)) {
+            if (isupper(ch)) {
+                message[i] = 'A' + (ch - 'A' + shift) % 26;
+            } else {
+                message[i] = 'a' + (ch - 'a' + shift) % 26;
+            }
+        }
+
+        i++;
+    }
+}
