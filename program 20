@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/des.h>
+
+void encrypt_des_ecb(const unsigned char *plaintext, int plaintext_len,
+                     const unsigned char *key, unsigned char *ciphertext) {
+    DES_cblock des_key;
+    DES_key_schedule key_schedule;
+
+    // Set the key
+    memcpy(des_key, key, 8);
+    DES_set_key_checked(&des_key, &key_schedule);
+
+    // Encrypt the plaintext
+    DES_ecb_encrypt((const_DES_cblock *)plaintext, (DES_cblock *)ciphertext, &key_schedule, DES_ENCRYPT);
+}
+
+void decrypt_des_ecb(const unsigned char *ciphertext, int ciphertext_len,
+                     const unsigned char *key, unsigned char *plaintext) {
+    DES_cblock des_key;
+    DES_key_schedule key_schedule;
+
+    // Set the key
+    memcpy(des_key, key, 8);
+    DES_set_key_checked(&des_key, &key_schedule);
+
+    // Decrypt the ciphertext
+    DES_ecb_encrypt((const_DES_cblock *)ciphertext, (DES_cblock *)plaintext, &key_schedule, DES_DECRYPT);
+}
+
+int main() {
+    unsigned char key[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
+    unsigned char plaintext[] = "Hello, ECB mode!";
+    int plaintext_len = strlen((char *)plaintext);
+
+    // Buffer for ciphertext
+    unsigned char ciphertext[256];
+
+    // Encrypt the plaintext
+    encrypt_des_ecb(plaintext, plaintext_len, key, ciphertext);
+
+    // Print the ciphertext
