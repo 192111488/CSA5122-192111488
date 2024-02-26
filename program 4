@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void polyalphabetic_encrypt(char plaintext[], char key[], char ciphertext[]);
+
+int main() {
+    char plaintext[100];
+    char key[100];
+    char ciphertext[100];
+
+    printf("Enter the plaintext to encrypt: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+
+    printf("Enter the key: ");
+    fgets(key, sizeof(key), stdin);
+
+    polyalphabetic_encrypt(plaintext, key, ciphertext);
+
+    printf("Encrypted text: %s\n", ciphertext);
+
+    return 0;
+}
+
+void polyalphabetic_encrypt(char plaintext[], char key[], char ciphertext[]) {
+    int i, j, k;
+    int len = strlen(plaintext);
+    int key_len = strlen(key) - 1; // Exclude newline character
+
+    for (i = 0, j = 0; i < len; i++, j++) {
+        if (plaintext[i] == '\n') {
+            break;
+        }
+
+        if (!isalpha(plaintext[i])) {
+            ciphertext[i] = plaintext[i];
+            j--;
+            continue;
+        }
+
+        int shift = tolower(key[j % key_len]) - 'a';
+
+        if (isupper(plaintext[i])) {
+            ciphertext[i] = 'A' + (plaintext[i] - 'A' + shift) % 26;
+        } else {
+            ciphertext[i] = 'a' + (plaintext[i] - 'a' + shift) % 26;
+        }
+    }
+
+    ciphertext[i] = '\0
